@@ -25,16 +25,16 @@ export function registerConfigCommand(program: Command) {
           name: 'supabaseUrl',
           message: 'Supabase Project URL:',
           default: currentConfig.supabaseUrl,
-          when: (answers) => answers.syncEnabled,
-          validate: (input) => input.startsWith('https://') ? true : 'URL은 https://로 시작해야 합니다.'
+          when: (answers: any) => answers.syncEnabled,
+          validate: (input: string) => input.startsWith('https://') ? true : 'URL은 https://로 시작해야 합니다.'
         },
         {
           type: 'password', // 비밀번호 타입으로 입력 (화면에 노출 안 됨)
           name: 'supabaseKey',
           message: 'Supabase Anon/Service Key:',
           default: currentConfig.supabaseKey, // 기존 키가 있어도 마스킹되어 표시됨
-          when: (answers) => answers.syncEnabled,
-          validate: (input) => input.length > 0 ? true : 'Key를 입력해주세요.'
+          when: (answers: any) => answers.syncEnabled,
+          validate: (input: string) => input.length > 0 ? true : 'Key를 입력해주세요.'
         }
       ]);
 

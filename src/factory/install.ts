@@ -601,10 +601,7 @@ async function status(): Promise<void> {
   }
   
   console.log('\n' + '─'.repeat(50));
-    console.log(`  ${fs.existsSync(OPENCODE_PLUGIN_FILE) ? '✓' : '✗'} 플러그인 ${fs.existsSync(OPENCODE_PLUGIN_FILE) ? '설치됨' : '미설치'}`);
-  } else {
-    console.log('  ✗ 미감지');
-  }
+  console.log(`  ${fs.existsSync(OPENCODE_PLUGIN_FILE) ? '✓' : '✗'} 플러그인 ${fs.existsSync(OPENCODE_PLUGIN_FILE) ? '설치됨' : '미설치'}`);
 
   // 데이터 디렉터리
   console.log('\n데이터:');
