@@ -5,11 +5,11 @@
  */
 
 // Claude Code 모듈
-export { ClaudeCodeHooksGenerator } from './claude-code/hooks-config';
-export * as ClaudeCodeHandlers from './claude-code/hook-handlers';
+export { ClaudeCodeHooksGenerator } from './claude-code/hooks-config.js';
+export * as ClaudeCodeHandlers from './claude-code/hook-handlers.js';
 
 // OpenCode 모듈
-export { MemoryFactoryPlugin } from './opencode/memory-factory-plugin';
+export { MemoryFactoryPlugin } from './opencode/memory-factory-plugin.js';
 
 // 설치 스크립트
-export * from './install';
+export * from './install.js';

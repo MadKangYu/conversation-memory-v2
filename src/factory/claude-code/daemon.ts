@@ -8,7 +8,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import { MemoryManager } from '../../core/memory-manager';
+import { MemoryManager } from '../../core/memory-manager.js';
 
 // 설정
 const QUEUE_DIR = path.join(os.tmpdir(), 'memory-factory-queue');

@@ -1,7 +1,9 @@
 import { execSync } from 'child_process';
-import { InstantCompressorV3 } from './instant-compressor-v3';
-import { StorageProvider, CompressedContext, ConversationItem } from './storage/types';
-import { SQLiteProvider } from './storage/sqlite-provider';
+import path from 'path';
+import fs from 'fs';
+import { InstantCompressorV3 } from './instant-compressor-v3.js';
+import { StorageProvider, CompressedContext, ConversationItem, Memory } from './storage/types.js';
+import { SQLiteProvider } from './storage/sqlite-provider.js';
 
 export class MemoryManager {
   private storage: StorageProvider;
@@ -9,16 +11,46 @@ export class MemoryManager {
   private readonly MAX_RECENT_ITEMS = 10;
   private readonly COMPRESSION_THRESHOLD = 5;
 
-  constructor(dbPath: string) {
-    // 기본적으로 SQLiteProvider 사용 (추후 설정에 따라 SupabaseProvider로 교체 가능)
+  constructor(dbPath?: string) {
+    // dbPath가 없으면 현재 디렉토리의 .forge/memory.db 사용
+    if (!dbPath) {
+      const projectRoot = process.cwd();
+      const forgeDir = path.join(projectRoot, '.forge');
+      
+      // .forge 디렉토리 생성
+      if (!fs.existsSync(forgeDir)) {
+        fs.mkdirSync(forgeDir, { recursive: true });
+      }
+
+      // .gitignore에 .forge 추가
+      const gitignorePath = path.join(projectRoot, '.gitignore');
+      const ignoreContent = '\n.forge/\n';
+      
+      if (fs.existsSync(gitignorePath)) {
+        const currentContent = fs.readFileSync(gitignorePath, 'utf-8');
+        if (!currentContent.includes('.forge/')) {
+          fs.appendFileSync(gitignorePath, ignoreContent);
+        }
+      } else {
+        fs.writeFileSync(gitignorePath, ignoreContent);
+      }
+
+      dbPath = path.join(forgeDir, 'memory.db');
+    }
+
     this.storage = new SQLiteProvider(dbPath);
     this.compressor = new InstantCompressorV3();
     
-    // 비동기 초기화는 생성자에서 await 할 수 없으므로, 
-    // 실제 사용 시점에 init이 완료되었음을 보장하거나 별도 init 메서드 호출 필요.
-    // 여기서는 편의상 동기적으로 동작하는 SQLite 특성을 고려하여 생성자에서 시작하되,
-    // 에러 처리를 위해 catch 블록 추가.
     this.storage.init().catch(console.error);
+  }
+
+  /**
+   * 의미 기반 기억 검색 (RAG용)
+   */
+  async search(query: string, options: { limit?: number } = {}): Promise<Memory[]> {
+    // 현재는 간단한 키워드 매칭으로 대체 (VectorStore가 아직 구현되지 않았으므로)
+    // 실제로는 여기서 VectorStore.search()를 호출해야 함
+    return [];
   }
 
   /**

@@ -15,8 +15,8 @@ import crypto from 'crypto';
  * 3. 파일 권한 600 강제
  */
 
-const CONFIG_DIR = path.join(os.homedir(), '.memory-factory');
-const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
+const CONFIG_DIR = path.join(os.homedir(), '.forge');
+const CONFIG_FILE = path.join(CONFIG_DIR, 'global.json');
 // 암호화 키는 기기 고유의 정보를 기반으로 생성하거나, 
 // 실제 프로덕션에서는 OS Keychain을 써야 하지만, 
 // 여기서는 파일 시스템 기반의 경량 암호화를 적용 (Machine ID 기반)
@@ -24,8 +24,16 @@ const ENCRYPTION_KEY = crypto.scryptSync(os.hostname() + os.userInfo().username,
 
 export interface AppConfig {
   supabaseUrl?: string;
-  supabaseKey?: string; // Encrypted in memory? No, decrypted when loaded.
+  supabaseKey?: string;
   syncEnabled: boolean;
+  model?: string; // AI 모델 ID
+  apiKeys?: {
+    openrouter?: string;
+    google?: string;
+    openai?: string;
+    anthropic?: string;
+    xai?: string;
+  };
 }
 
 export class ConfigManager {
@@ -45,7 +53,8 @@ export class ConfigManager {
   private loadConfig(): AppConfig {
     // 1. 기본값
     let config: AppConfig = {
-      syncEnabled: false
+      syncEnabled: false,
+      model: 'google/gemini-2.0-flash-exp:free' // 기본값: Gemini 2.0 Flash (무료)
     };
 
     // 2. 파일 로드
@@ -57,6 +66,15 @@ export class ConfigManager {
         // 복호화 필요한 필드 처리
         if (stored.supabaseKey) {
           stored.supabaseKey = this.decrypt(stored.supabaseKey);
+        }
+
+        if (stored.apiKeys) {
+          const keys = stored.apiKeys;
+          if (keys.openrouter) keys.openrouter = this.decrypt(keys.openrouter);
+          if (keys.google) keys.google = this.decrypt(keys.google);
+          if (keys.openai) keys.openai = this.decrypt(keys.openai);
+          if (keys.anthropic) keys.anthropic = this.decrypt(keys.anthropic);
+          if (keys.xai) keys.xai = this.decrypt(keys.xai);
         }
         
         config = { ...config, ...stored };
@@ -94,6 +112,17 @@ export class ConfigManager {
     // 암호화 필요한 필드 처리
     if (toSave.supabaseKey) {
       toSave.supabaseKey = this.encrypt(toSave.supabaseKey);
+    }
+
+    if (toSave.apiKeys) {
+      // 깊은 복사 후 암호화
+      const keys = { ...toSave.apiKeys };
+      if (keys.openrouter) keys.openrouter = this.encrypt(keys.openrouter);
+      if (keys.google) keys.google = this.encrypt(keys.google);
+      if (keys.openai) keys.openai = this.encrypt(keys.openai);
+      if (keys.anthropic) keys.anthropic = this.encrypt(keys.anthropic);
+      if (keys.xai) keys.xai = this.encrypt(keys.xai);
+      toSave.apiKeys = keys;
     }
 
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(toSave, null, 2), { mode: 0o600 }); // rw-------

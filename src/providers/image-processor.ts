@@ -122,10 +122,16 @@ export class ImageProcessor {
 
 JSON만 응답하고 다른 텍스트는 포함하지 마세요.`;
 
-    const response = await this.llmProvider.completeWithVision(
-      prompt,
-      [{ base64: processedImage.base64, mimeType: processedImage.mimeType }]
-    );
+    const response = await this.llmProvider.completeWithVision([
+      { role: 'system', content: 'You are an expert at analyzing images and extracting structured information.' },
+      { 
+        role: 'user', 
+        content: [
+          { type: 'text', text: prompt },
+          { type: 'image_url', image_url: { url: `data:${processedImage.mimeType};base64,${processedImage.base64}` } }
+        ]
+      }
+    ]);
 
     // JSON 파싱 시도
     let analysisData: any;
@@ -182,10 +188,16 @@ JSON만 응답하고 다른 텍스트는 포함하지 마세요.`;
 
 코드가 없으면 code를 빈 문자열로, confidence를 0으로 설정하세요.`;
 
-    const response = await this.llmProvider.completeWithVision(
-      prompt,
-      [{ base64: processedImage.base64, mimeType: processedImage.mimeType }]
-    );
+    const response = await this.llmProvider.completeWithVision([
+      { role: 'system', content: 'You are an expert at analyzing code from screenshots.' },
+      { 
+        role: 'user', 
+        content: [
+          { type: 'text', text: prompt },
+          { type: 'image_url', image_url: { url: `data:${processedImage.mimeType};base64,${processedImage.base64}` } }
+        ]
+      }
+    ]);
 
     try {
       const jsonMatch = response.content.match(/\{[\s\S]*\}/);
@@ -219,10 +231,16 @@ JSON만 응답하고 다른 텍스트는 포함하지 마세요.`;
   "description": "다이어그램 전체 설명"
 }`;
 
-    const response = await this.llmProvider.completeWithVision(
-      prompt,
-      [{ base64: processedImage.base64, mimeType: processedImage.mimeType }]
-    );
+    const response = await this.llmProvider.completeWithVision([
+      { role: 'system', content: 'You are an expert at analyzing diagrams and technical drawings.' },
+      { 
+        role: 'user', 
+        content: [
+          { type: 'text', text: prompt },
+          { type: 'image_url', image_url: { url: `data:${processedImage.mimeType};base64,${processedImage.base64}` } }
+        ]
+      }
+    ]);
 
     try {
       const jsonMatch = response.content.match(/\{[\s\S]*\}/);

@@ -11,6 +11,28 @@
 
 ---
 
+## 🔥 The Forge: Autonomous Coding Agent (New!)
+
+**The Forge**는 Claude Code의 강력한 기능을 누구나 무료로 사용할 수 있도록 만든 **자율 코딩 에이전트**입니다.
+Gemini 2.0 Flash(무료)를 두뇌로 사용하여, 복잡한 코딩 작업을 스스로 계획하고 실행합니다.
+
+### 주요 기능
+*   **자율 실행**: "로그인 페이지 만들어줘"라고 말하면, 필요한 파일을 생성하고 코드를 작성합니다.
+*   **무료 사용**: Gemini 2.0 Flash 모델을 기본으로 사용하여 비용 부담이 없습니다.
+*   **도구 사용**: 파일 시스템 조작, 쉘 명령어 실행 등 실제 개발자가 하는 작업을 수행합니다.
+*   **안전한 실행**: 모든 작업은 사용자의 로컬 환경에서 실행되며, 데이터가 외부로 유출되지 않습니다.
+*   **웹 자동화**: Grok 등 웹 인터페이스만 제공하는 LLM도 자동으로 제어하여 API처럼 사용합니다.
+*   **지식 관리**: 대화 내용을 자동으로 정리하여 위키 문서(`docs/`)로 만들고, 모든 질문을 기록(`docs/history/`)합니다.
+
+### 실행 방법
+
+```bash
+# The Forge 실행 (REPL 모드)
+memory-factory forge
+```
+
+---
+
 ## 🚀 What's New in V3?
 
 ### 1. 🌌 Multiverse Memory (Context Isolation)
@@ -55,6 +77,23 @@ memory-factory config
 *   대화형 프롬프트에 따라 Supabase URL과 Key를 입력하세요.
 *   Key는 안전하게 암호화되어 저장됩니다.
 
+### 4. AI 모델 변경 (Model Switching) 🧠
+
+기본 모델은 **Google Gemini 2.0 Flash (무료)**입니다. 더 강력한 모델이 필요하다면 언제든 교체하세요.
+
+```bash
+# 추천 모델 목록 보기
+memory-factory model list
+
+# 모델 변경 (예: GPT-4o Mini)
+memory-factory model set openai/gpt-4o-mini
+
+# Grok 웹 자동화 모드 설정 (API 키 불필요, Chrome 필요)
+memory-factory model set grok/web-auto
+```
+
+> **Tip**: OpenRouter API Key 하나만 있으면 모든 모델을 사용할 수 있습니다. 별도의 Google/OpenAI 키가 필요 없습니다.
+> **Note**: `grok/web-auto` 모드는 로컬 Chrome 브라우저가 설치되어 있어야 하며, Puppeteer를 통해 제어됩니다.
 ---
 
 ## ✨ V2 핵심 기능 (여전히 강력함)
@@ -69,6 +108,7 @@ memory-factory config
 ---
 
 ## 🔧 Claude Code 연동
+
 
 `~/.claude/mcp.json` 파일에 다음 설정을 추가하세요:
 

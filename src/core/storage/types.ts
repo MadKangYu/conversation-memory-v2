@@ -15,6 +15,13 @@ export interface ConversationItem {
   is_compressed?: boolean;
 }
 
+export interface Memory {
+  id: number;
+  content: string;
+  similarity: number;
+  metadata?: Record<string, any>;
+}
+
 export interface MemoryState {
   summary: string;
   key_facts: string[];

@@ -1,0 +1,26 @@
+# The Forge 개발 할 일 목록
+
+- [x] Agent Core 구현 (ReAct 패턴)
+- [x] Tool System 구현 (File, Shell)
+- [x] REPL 구현 (Interactive CLI)
+- [x] CLI 통합 (`memory-factory forge`)
+- [x] @ 명령어 구현 (`@sh`, `@read` 등)
+- [x] 멀티 세션 동시성 지원 (SQLite WAL)
+- [x] 2026년형 모델 업그레이드 (Gemini 3.0, GPT-5)
+- [x] 프록시 우회 지원 (`HTTPS_PROXY`)
+- [x] One-Shot 모드 구현 (`forge "command"`)
+- [x] 멀티 프로바이더 키 관리 (Google, OpenAI, Anthropic, xAI)
+- [x] 스마트 라우팅 (Direct API 우선)
+- [x] xAI (Grok) Direct API 지원
+- [x] MCP Bridge 구현 (Claude Code 대체)
+- [x] Strategy Pattern 리팩토링
+- [x] Dynamic RAG 구현 (Context Bloat 해결)
+- [x] 사용자 친화적 폴더 구조 적용 (`.forge` 숨김 폴더)
+- [x] `forge.json` 설정 로직 구현
+- [x] `.gitignore` 자동 업데이트 로직 추가
+- [x] KnowledgeManager 구현 (대화 분석 및 카테고리화)
+- [x] Auto-Wiki 생성 로직 (Markdown 파일 관리)
+- [x] `@wiki` 명령어 구현
+- [ ] GrokWebStrategy 구현 (Puppeteer 기반 웹 자동화)
+- [ ] QueryArchiver 구현 (사용자 질문 기록)
+- [ ] 최종 문서화 및 검증

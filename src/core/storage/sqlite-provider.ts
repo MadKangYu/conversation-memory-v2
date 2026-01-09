@@ -13,11 +13,12 @@ export class SQLiteProvider implements StorageProvider {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    this.db = new Database(dbPath);
+    this.db = new Database(dbPath, { timeout: 5000 }); // 5초 대기
   }
 
   async init(): Promise<void> {
     this.db.pragma('journal_mode = WAL');
+    this.db.pragma('synchronous = NORMAL'); // 성능 향상 (안전성 유지)
     
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS conversation_logs (

@@ -14,6 +14,8 @@ import { formatNumber, formatPercent, relativeTime } from '../utils/helpers.js';
 import { formatTokens } from '../utils/tokenizer.js';
 import { readFileSync, existsSync } from 'fs';
 import { resolve, join } from 'path';
+import { registerConfigCommand } from './config-command.js';
+import { registerModelCommand } from './model-command.js';
 
 const program = new Command();
 
@@ -324,8 +326,25 @@ program
   });
 
 // ============================================================================
-// 설정 명령
+// 설정 및 모델 명령
 // ============================================================================
+
+registerConfigCommand(program);
+registerModelCommand(program);
+import { startRepl, runOneShot } from '../forge/index.js';
+
+program
+  .command('forge')
+  .description('The Forge: Autonomous Coding Agent')
+  .argument('[prompt...]', 'One-Shot 실행을 위한 프롬프트')
+  .action(async (promptParts) => {
+    if (promptParts && promptParts.length > 0) {
+      const prompt = promptParts.join(' ');
+      await runOneShot(prompt);
+    } else {
+      await startRepl();
+    }
+  });
 
 program
   .command('init')
