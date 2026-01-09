@@ -46,11 +46,38 @@ export class MemoryManager {
 
   /**
    * 의미 기반 기억 검색 (RAG용)
+   * 현재는 SQLite의 LIKE 쿼리를 활용한 키워드 검색으로 구현
    */
   async search(query: string, options: { limit?: number } = {}): Promise<Memory[]> {
-    // 현재는 간단한 키워드 매칭으로 대체 (VectorStore가 아직 구현되지 않았으므로)
-    // 실제로는 여기서 VectorStore.search()를 호출해야 함
-    return [];
+    const limit = options.limit || 5;
+    
+    // 1. 쿼리에서 주요 키워드 추출 (간단히 공백으로 분리하고 2글자 이상인 것만)
+    const keywords = query.split(/\s+/).filter(w => w.length > 2);
+    
+    if (keywords.length === 0) return [];
+
+    // 2. 저장소에서 키워드가 포함된 로그 검색 (SQLiteProvider에 searchLogs 메서드가 있다고 가정하거나 직접 구현 필요)
+    // 여기서는 getRecentLogs를 활용하여 메모리 내에서 필터링하는 방식으로 임시 구현
+    // 실제 프로덕션에서는 FTS(Full Text Search) 또는 Vector DB 사용 권장
+    
+    const projectPath = process.cwd();
+    const branch = this.getGitBranch(projectPath);
+    
+    // 최근 100개 정도 가져와서 검색 (성능 고려)
+    const recentLogs = await this.storage.getRecentLogs(projectPath, branch, 100);
+    
+    const results: Memory[] = recentLogs
+      .filter(log => keywords.some(k => log.content.toLowerCase().includes(k.toLowerCase())))
+      .map(log => ({
+        id: log.id?.toString() || Date.now().toString(),
+        content: log.content,
+        type: 'conversation',
+        timestamp: log.timestamp,
+        metadata: { role: log.role }
+      }))
+      .slice(0, limit);
+
+    return results;
   }
 
   /**
@@ -90,14 +117,6 @@ export class MemoryManager {
    * 현재 컨텍스트(프로젝트/브랜치)에 맞는 기억을 인출합니다.
    */
   public getContext(cwd: string = process.cwd()): CompressedContext {
-    // getContext는 동기적으로 호출되는 경우가 많으므로(특히 Hook에서),
-    // 내부적으로 비동기 호출을 기다릴 수 있도록 구조를 변경해야 하지만,
-    // 현재 아키텍처(Daemon)에서는 비동기가 가능함.
-    // 다만, 기존 코드 호환성을 위해 동기 메서드처럼 보이지만 내부적으로 Promise를 처리해야 함.
-    // 여기서는 편의상 deasync를 쓰거나, 호출하는 쪽(Daemon)을 async로 바꿔야 함.
-    // Daemon은 이미 async이므로, 이 메서드도 async로 변경하는 것이 옳음.
-    // 하지만 인터페이스 변경을 최소화하기 위해 일단 동기적으로 동작하는 SQLiteProvider를 가정하고 작성하되,
-    // 향후 Supabase 연동 시에는 async/await가 필수적이므로 메서드 시그니처를 변경함.
     throw new Error("Use getContextAsync instead");
   }
 
