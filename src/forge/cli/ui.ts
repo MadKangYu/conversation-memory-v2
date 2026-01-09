@@ -3,6 +3,7 @@ import figlet from 'figlet';
 import gradient from 'gradient-string';
 import boxen from 'boxen';
 import ora from 'ora';
+import { CommandDoc, COMMANDS } from './commands.js';
 
 // Hextech Color Palette
 const COLORS = {
@@ -78,5 +79,63 @@ export const UI = {
   },
 
   // Prompt Style
-  prompt: () => chalk.hex(COLORS.neonGreen).bold('Forge> ')
+  prompt: () => chalk.hex(COLORS.neonGreen).bold('Forge> '),
+
+  // Help Documentation Renderer
+  printHelp: (commandName?: string) => {
+    if (commandName) {
+      // Specific command help
+      const cmd = COMMANDS[commandName] || Object.values(COMMANDS).find(c => c.name === `@${commandName}`);
+      
+      if (!cmd) {
+        console.log(chalk.red(`\n✖ Unknown command: ${commandName}`));
+        console.log(chalk.gray('Type "@help" to see all available commands.\n'));
+        return;
+      }
+
+      const content = [
+        chalk.hex(COLORS.hexGold).bold(`USAGE: ${cmd.usage}`),
+        '',
+        chalk.white(cmd.description),
+        '',
+        chalk.hex(COLORS.hexBlue).bold('EXAMPLES:'),
+        ...cmd.examples.map(ex => chalk.gray(`  $ ${ex}`))
+      ].join('\n');
+
+      console.log(boxen(content, {
+        title: chalk.hex(COLORS.neonGreen).bold(` ${cmd.name.toUpperCase()} `),
+        padding: 1,
+        borderStyle: 'double',
+        borderColor: COLORS.hexBlue,
+        backgroundColor: '#050505'
+      }));
+
+    } else {
+      // All commands list
+      const categories = ['System', 'Filesystem', 'Knowledge', 'General'] as const;
+      
+      let content = chalk.hex(COLORS.hexGold).bold('AVAILABLE COMMANDS\n\n');
+
+      categories.forEach(cat => {
+        const cmds = Object.values(COMMANDS).filter(c => c.category === cat);
+        if (cmds.length > 0) {
+          content += chalk.hex(COLORS.neonGreen).bold(`[ ${cat} ]\n`);
+          cmds.forEach(cmd => {
+            content += `${chalk.hex(COLORS.hexBlue).bold(cmd.name.padEnd(10))} ${chalk.white(cmd.description)}\n`;
+          });
+          content += '\n';
+        }
+      });
+
+      content += chalk.gray('Type "@help <command>" for detailed usage.');
+
+      console.log(boxen(content, {
+        title: chalk.bold(' HEXTECH MANUAL '),
+        padding: 1,
+        borderStyle: 'round',
+        borderColor: COLORS.neonGreen,
+        backgroundColor: '#050505'
+      }));
+    }
+  }
 };

@@ -141,18 +141,13 @@ export async function startRepl() {
             break;
 
           case 'help':
-            UI.box(
-              '@sh <cmd>    - Execute shell command\n' +
-              '@read <path> - Read file content\n' +
-              '@list [path] - List files in directory\n' +
-              '@wiki        - Generate/Update documentation\n' +
-              '@help        - Show this help message',
-              'COMMANDS'
-            );
+            // argStr이 있으면 특정 명령어 도움말, 없으면 전체 목록
+            UI.printHelp(argStr || undefined);
             break;
 
           default:
             UI.log.warn(`Unknown command: @${cmd}`);
+            UI.log.system('Type "@help" for available commands.');
         }
       } catch (error) {
         UI.log.error(`${error instanceof Error ? error.message : String(error)}`);
