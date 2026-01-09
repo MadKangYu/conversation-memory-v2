@@ -1,0 +1,60 @@
+sequenceDiagram
+    autonumber
+    participant User as 👤 사용자
+    participant Orchestrator as 🎼 오케스트라<br/>(Claude Code)
+    participant MCP as 🔌 MCP 서버
+    participant IC as ⚡ InstantCompressor
+    participant JE as 🥊 JabEngine
+    participant OR as 🌐 OpenRouter
+    participant DB as 💾 SQLite
+
+    Note over User,DB: Phase 1: InstantCompressor (LLM 없음)
+    
+    User->>Orchestrator: 대화 메시지 (10M 토큰)
+    Orchestrator->>MCP: memory_add_message()
+    MCP->>IC: compress(text)
+    
+    activate IC
+    IC->>IC: 1. 청킹 (500토큰 × 20,000개)
+    IC->>IC: 2. TF-IDF 키워드 추출
+    IC->>IC: 3. TextRank 문장 추출
+    IC->>IC: 4. SimHash 중복 제거
+    IC-->>MCP: 압축된 청크 (200개)
+    deactivate IC
+    
+    Note over IC: ~500ms (LLM 호출 없음)
+    
+    MCP->>DB: 청크 저장
+    
+    Note over User,DB: Phase 2: JabEngine (LLM 병렬 호출)
+    
+    MCP->>JE: jabCompress(chunks)
+    
+    activate JE
+    
+    par 병렬 요약 (8 Workers)
+        JE->>OR: Worker 1: 청크 1-25
+        JE->>OR: Worker 2: 청크 26-50
+        JE->>OR: Worker 3: 청크 51-75
+        JE->>OR: Worker 4: 청크 76-100
+        JE->>OR: Worker 5: 청크 101-125
+        JE->>OR: Worker 6: 청크 126-150
+        JE->>OR: Worker 7: 청크 151-175
+        JE->>OR: Worker 8: 청크 176-200
+    end
+    
+    Note over OR: Cerebras 70B: 100ms/요청
+    
+    OR-->>JE: 요약된 청크 (200개 × 150토큰)
+    
+    JE->>JE: 계층적 병합 (Level 1-3)
+    JE-->>MCP: 최종 컨텍스트 (~8K 토큰)
+    deactivate JE
+    
+    Note over JE: ~2.5초 (병렬 처리)
+    
+    MCP->>DB: 컨텍스트 저장
+    MCP-->>Orchestrator: 압축 완료
+    Orchestrator-->>User: 응답 생성
+    
+    Note over User,DB: 총 처리 시간: ~3초 (10M 토큰 → 8K 토큰)

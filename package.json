@@ -1,0 +1,65 @@
+{
+  "name": "conversation-memory-v2",
+  "version": "1.0.0",
+  "description": "Optimal conversation compression system for OpenCode and ClaudeCode",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "conv-memory": "./dist/cli/index.js"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/cli/index.ts",
+    "start": "node dist/cli/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "mcp": "node dist/mcp/server.js",
+    "worker": "node dist/background/worker.js",
+    "lint": "eslint src --ext .ts",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "conversation",
+    "memory",
+    "compression",
+    "opencode",
+    "claudecode",
+    "mcp",
+    "cli",
+    "agent"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "better-sqlite3": "^11.7.0",
+    "chalk": "^5.4.1",
+    "commander": "^13.0.0",
+    "ora": "^8.1.1",
+    "tiktoken": "^1.0.18"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.5",
+    "@typescript-eslint/eslint-plugin": "^8.19.1",
+    "@typescript-eslint/parser": "^8.19.1",
+    "eslint": "^9.17.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MadKangYu/Manus-Private-Website"
+  }
+}

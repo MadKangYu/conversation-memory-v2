@@ -1,0 +1,35 @@
+{
+  "$schema": "https://opencode.ai/schemas/config.json",
+  "mcpServers": {
+    "conversation-memory": {
+      "command": "node",
+      "args": ["{{INSTALL_PATH}}/dist/cli/index.js", "serve"],
+      "env": {
+        "OPENROUTER_API_KEY": "{{OPENROUTER_API_KEY}}",
+        "MEMORY_COMPRESSION_THRESHOLD": "50000",
+        "MEMORY_WARNING_THRESHOLD": "30000"
+      }
+    }
+  },
+  "systemPrompt": {
+    "append": [
+      "",
+      "## Memory Management (Conversation Memory V2)",
+      "",
+      "This session uses Conversation Memory V2 for context management.",
+      "",
+      "### Required Actions:",
+      "1. **Before each response**: Call `memory_should_compress` to check if compression is needed",
+      "2. **If compression needed**: Call `memory_get_context` and use compressed context",
+      "3. **After each message**: Call `memory_auto_save` to persist the message",
+      "",
+      "### Search Past Conversations:",
+      "- Use `memory_search` when user asks about previous discussions",
+      "- Use `memory_get_snapshot` to check session health",
+      "",
+      "### Emergency:",
+      "- Use `memory_force_compress` if context becomes too large",
+      ""
+    ]
+  }
+}

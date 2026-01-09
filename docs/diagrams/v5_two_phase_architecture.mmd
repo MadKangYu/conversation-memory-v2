@@ -1,0 +1,88 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#4A90D9', 'primaryTextColor': '#fff', 'primaryBorderColor': '#2E6AB3', 'lineColor': '#5C6BC0', 'secondaryColor': '#81C784', 'tertiaryColor': '#FFB74D'}}}%%
+flowchart TB
+    subgraph INPUT["📥 입력"]
+        A[("10M 토큰<br/>대화 데이터")]
+    end
+
+    subgraph PHASE1["🚀 Phase 1: InstantCompressor (LLM 없음, ~500ms)"]
+        direction TB
+        B["청킹<br/>500토큰 × 20,000개"]
+        
+        subgraph TFIDF["TF-IDF 키워드 추출"]
+            C1["TF 계산<br/>(단어 빈도)"]
+            C2["IDF 계산<br/>(역문서 빈도)"]
+            C3["상위 20개<br/>키워드 추출"]
+        end
+        
+        subgraph TEXTRANK["TextRank 문장 추출"]
+            D1["유사도 행렬<br/>생성"]
+            D2["PageRank<br/>실행"]
+            D3["상위 3개<br/>문장 추출"]
+        end
+        
+        subgraph SIMHASH["SimHash 중복 제거"]
+            E1["64비트 해시<br/>생성"]
+            E2["해밍 거리<br/>계산"]
+            E3["거리 ≤ 3<br/>중복 폐기"]
+        end
+        
+        F["압축된 청크<br/>200개 (~99% 압축)"]
+    end
+
+    subgraph PHASE2["🥊 Phase 2: JabEngine (LLM 병렬 호출, ~2.5초)"]
+        direction TB
+        
+        subgraph MODELS["초고속 모델 풀"]
+            G1["Cerebras 70B<br/>100ms"]
+            G2["Groq Llama 70B<br/>130ms"]
+            G3["Grok 4.1 Fast<br/>300ms"]
+        end
+        
+        subgraph PARALLEL["병렬 처리 (8 Workers)"]
+            H1["Worker 1"]
+            H2["Worker 2"]
+            H3["Worker 3"]
+            H4["Worker ..."]
+            H5["Worker 8"]
+        end
+        
+        I["요약된 청크<br/>200개 × 150토큰"]
+        
+        subgraph MERGE["계층적 병합"]
+            J1["Level 1<br/>5개씩 병합"]
+            J2["Level 2<br/>5개씩 병합"]
+            J3["Level 3<br/>최종 병합"]
+        end
+    end
+
+    subgraph OUTPUT["📤 출력"]
+        K[("최종 컨텍스트<br/>~8K 토큰")]
+    end
+
+    subgraph MACBOOK["💻 MacBook Pro M3 최적화"]
+        L1["CPU 모니터링<br/>< 30%"]
+        L2["메모리 압력<br/>< 70%"]
+        L3["적응형 동시성<br/>1~8 Workers"]
+    end
+
+    A --> B
+    B --> C1 --> C2 --> C3
+    B --> D1 --> D2 --> D3
+    C3 --> E1
+    D3 --> E1
+    E1 --> E2 --> E3 --> F
+    
+    F --> G1 & G2 & G3
+    G1 & G2 & G3 --> H1 & H2 & H3 & H4 & H5
+    H1 & H2 & H3 & H4 & H5 --> I
+    I --> J1 --> J2 --> J3 --> K
+    
+    L1 -.-> H1
+    L2 -.-> H1
+    L3 -.-> H1
+
+    style INPUT fill:#E3F2FD,stroke:#1565C0
+    style PHASE1 fill:#E8F5E9,stroke:#2E7D32
+    style PHASE2 fill:#FFF3E0,stroke:#EF6C00
+    style OUTPUT fill:#F3E5F5,stroke:#7B1FA2
+    style MACBOOK fill:#ECEFF1,stroke:#546E7A

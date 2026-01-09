@@ -1,0 +1,103 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#4A90D9', 'primaryTextColor': '#fff', 'primaryBorderColor': '#2E5A8B', 'lineColor': '#5C6BC0', 'secondaryColor': '#81C784', 'tertiaryColor': '#FFB74D'}}}%%
+
+flowchart TB
+    subgraph USER["👤 사용자 (User)"]
+        U1["터미널 / IDE"]
+    end
+
+    subgraph ORCHESTRATOR["🎼 오케스트라 (Orchestrator)"]
+        direction TB
+        O1["Claude Code / OpenCode / Cursor"]
+        O2["System Prompt / CLAUDE.md"]
+        O3["컨텍스트 윈도우<br/>(200K 토큰 한계)"]
+        
+        O1 --> O2
+        O2 --> O3
+    end
+
+    subgraph MCP["🔌 MCP 프로토콜 (Model Context Protocol)"]
+        direction LR
+        M1["JSON-RPC 2.0"]
+        M2["도구 호출<br/>(Tool Call)"]
+        M3["리소스 조회<br/>(Resource)"]
+        
+        M1 --> M2
+        M1 --> M3
+    end
+
+    subgraph AGENT["🤖 에이전트 (Conversation Memory V2)"]
+        direction TB
+        
+        subgraph CORE["핵심 모듈"]
+            A1["Chunker<br/>(500토큰 분할)"]
+            A2["Summarizer<br/>(LLM 요약)"]
+            A3["Merger<br/>(기계적 병합)"]
+            A4["Indexer<br/>(태그 추출)"]
+        end
+        
+        subgraph STORAGE["저장소"]
+            S1["SQLite + FTS5<br/>(전문 검색)"]
+            S2["Cache Manager<br/>(LRU 캐시)"]
+        end
+        
+        subgraph PROVIDERS["프로바이더"]
+            P1["LLM Provider<br/>(OpenRouter)"]
+            P2["Image Processor<br/>(Vision API)"]
+        end
+        
+        A1 --> A2
+        A2 --> A3
+        A3 --> A4
+        A4 --> S1
+        A2 --> P1
+        S1 --> S2
+    end
+
+    subgraph CLI["⌨️ CLI (Command Line Interface)"]
+        direction LR
+        C1["conv-memory serve"]
+        C2["conv-memory start"]
+        C3["conv-memory add"]
+        C4["conv-memory context"]
+        C5["conv-memory search"]
+    end
+
+    subgraph TOOLS["🔧 MCP 도구 목록"]
+        direction TB
+        T1["memory_should_compress<br/>압축 필요 여부 확인"]
+        T2["memory_get_context<br/>압축된 컨텍스트 조회"]
+        T3["memory_add_message<br/>메시지 저장"]
+        T4["memory_search<br/>대화 기록 검색"]
+        T5["memory_auto_save<br/>자동 저장"]
+    end
+
+    %% 연결선
+    U1 <--> O1
+    U1 <--> C1
+    
+    O1 <-->|"MCP Protocol"| MCP
+    MCP <-->|"JSON-RPC"| AGENT
+    
+    C1 -->|"서버 시작"| AGENT
+    C2 -->|"대화 시작"| AGENT
+    C3 -->|"메시지 추가"| AGENT
+    C4 -->|"컨텍스트 조회"| AGENT
+    C5 -->|"검색"| AGENT
+    
+    MCP --> TOOLS
+    TOOLS --> AGENT
+
+    %% 스타일
+    classDef userStyle fill:#E3F2FD,stroke:#1565C0,stroke-width:2px
+    classDef orchestratorStyle fill:#FFF3E0,stroke:#E65100,stroke-width:2px
+    classDef mcpStyle fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px
+    classDef agentStyle fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px
+    classDef cliStyle fill:#ECEFF1,stroke:#455A64,stroke-width:2px
+    classDef toolsStyle fill:#E0F7FA,stroke:#00838F,stroke-width:2px
+    
+    class USER userStyle
+    class ORCHESTRATOR orchestratorStyle
+    class MCP mcpStyle
+    class AGENT agentStyle
+    class CLI cliStyle
+    class TOOLS toolsStyle

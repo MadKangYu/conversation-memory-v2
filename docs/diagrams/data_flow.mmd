@@ -1,0 +1,91 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#4A90D9'}}}%%
+
+sequenceDiagram
+    autonumber
+    participant U as 👤 사용자
+    participant O as 🎼 오케스트라<br/>(Claude Code)
+    participant M as 🔌 MCP
+    participant A as 🤖 에이전트<br/>(Memory V2)
+    participant L as 🧠 LLM<br/>(OpenRouter)
+    participant D as 💾 SQLite
+
+    Note over U,D: 📍 Phase 1: 대화 시작 및 메시지 저장
+
+    U->>O: 프로젝트 작업 시작
+    O->>M: memory_start_conversation()
+    M->>A: 새 대화 생성
+    A->>D: INSERT conversation
+    A-->>M: { conversationId: "conv_xxx" }
+    M-->>O: 대화 ID 반환
+
+    loop 대화 진행 (매 턴마다)
+        U->>O: 질문/요청
+        O->>M: memory_add_message(user, "질문")
+        M->>A: 메시지 저장
+        A->>A: Chunker: 500토큰 분할
+        A->>D: INSERT message, chunk
+        
+        Note over A,L: 백그라운드 비동기 요약
+        A--)L: 청크 요약 요청 (async)
+        L--)A: JSON 요약 반환
+        A--)D: UPDATE chunk.summary
+        
+        A-->>M: { messageId, tokens }
+        M-->>O: 저장 완료
+        
+        O->>U: AI 응답
+        O->>M: memory_add_message(assistant, "응답")
+        M->>A: 응답 저장
+        A->>D: INSERT message
+    end
+
+    Note over U,D: 📍 Phase 2: 압축 트리거 (50K 토큰 도달 시)
+
+    O->>M: memory_should_compress()
+    M->>A: 압축 필요 여부 확인
+    A->>D: SELECT SUM(tokens)
+    D-->>A: currentTokens: 52000
+    A-->>M: { shouldCompress: true, currentTokens: 52000 }
+    M-->>O: 압축 필요!
+
+    O->>M: memory_get_context()
+    M->>A: 압축 컨텍스트 요청
+    
+    Note over A,D: 계층적 병합 실행
+    A->>D: SELECT summaries
+    A->>A: Merger: 기계적 병합
+    A->>A: Level 1 → Level 2 → Level 3
+    A-->>M: { compressedContext, tokens: 5200 }
+    M-->>O: 압축된 컨텍스트 (5.2K 토큰)
+
+    Note over O: 기존 대화 삭제, 압축 컨텍스트로 교체
+    O->>O: 컨텍스트 윈도우 갱신
+
+    Note over U,D: 📍 Phase 3: 검색 및 조회
+
+    U->>O: "지난번 결제 연동 어떻게 했지?"
+    O->>M: memory_search("결제 연동")
+    M->>A: FTS5 검색
+    A->>D: SELECT ... MATCH '결제 연동'
+    D-->>A: 검색 결과 (하이라이팅)
+    A-->>M: [{ snippet: "...결제 연동...", score: 0.95 }]
+    M-->>O: 검색 결과 반환
+    O->>U: "지난번에 Stripe API로 결제 연동했습니다..."
+
+    Note over U,D: 📍 Phase 4: 세션 종료 및 재개
+
+    U->>O: 작업 종료
+    O->>M: memory_auto_save()
+    M->>A: 최종 상태 저장
+    A->>D: UPDATE conversation.state
+    A-->>M: { saved: true }
+
+    Note over U,D: ⏰ 다음 날...
+
+    U->>O: 프로젝트 재개
+    O->>M: memory_get_context()
+    M->>A: 이전 컨텍스트 로드
+    A->>D: SELECT compressed_context
+    A-->>M: { context: "어제까지의 진행상황..." }
+    M-->>O: 컨텍스트 복원
+    O->>U: "어제 Stripe 결제 연동까지 완료했습니다. 이어서 진행할까요?"
