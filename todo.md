@@ -21,6 +21,9 @@
 - [x] KnowledgeManager 구현 (대화 분석 및 카테고리화)
 - [x] Auto-Wiki 생성 로직 (Markdown 파일 관리)
 - [x] `@wiki` 명령어 구현
-- [ ] GrokWebStrategy 구현 (Puppeteer 기반 웹 자동화)
-- [ ] QueryArchiver 구현 (사용자 질문 기록)
-- [ ] 최종 문서화 및 검증
+- [x] GrokWebStrategy 구현 (Puppeteer 기반 웹 자동화)
+- [x] QueryArchiver 구현 (사용자 질문 기록)
+- [x] 웹사이트 리디자인: LoL 스타일 Dark Neon Brutalism
+- [ ] 문서 고도화: POD (Product Overview Document)
+- [ ] 문서 고도화: PRD (Product Requirements Document)
+- [ ] 웹사이트 고도화: Hextech 애니메이션 (Gears, Particles)
